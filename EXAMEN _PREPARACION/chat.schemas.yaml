@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Movie API
+  version: 1.0.0
+  description: API para gestionar una colección de películas
+paths:
+  /movies:
+    get:
+      summary: Get all movies
+      parameters:
+      - name: year
+        in: query
+        required: false
+        description: Filtra por año
+        schema:
+          type: integer
+          example: 2023
+      responses:
+        '200':
+          description: Lista de películas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movies'
+              example: 
+              title: magopop
+              year: 2000            
+    post:
+      summary: Añadir nueva película
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Movie'
+      responses:
+        '201':
+          description: Película creada correctamente
+  /movies/{movieId}:
+    get:
+      summary: Obtener una película por ID
+      parameters:
+        - $ref: '#/components/parameters/movieId'
+      responses:
+        '200':
+          description: Detalles de la película
+          content:
+              application/xml:
+                schema:
+                $ref: '#/components/schemas/Movie'
+          '400':
+           description: pelicula no encontrada 
+    delete:
+      summary: Eliminar id de una película
+      description: TODO
+      responses:
+        "200":
+          description: "Ok"
+        "404":
+          description: The provided parameters are incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorMessage"
+components:
+  parameters:
+    movieId:
+      name: movieId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Movies:
+      type: array
+      items:
+        $ref: '#/components/schemas/Movie'
+      
+    Movie:
+      type: object
+      properties:
+        title:
+          type: string
+        year:
+          type: integer
+        id: 
+          type : string
+        required:
+          - title
+          - id
+        anyOf:
+          - required: ["email"]
+          - required: ["telefono"]
+    errorMessage:
+      type: object
+      properties:
+        error:
+          type: string
+          enum: ["Faltan parámetros"]
+        mensaje:
+          type: string
+      required:
+      - error
+      - mensaje

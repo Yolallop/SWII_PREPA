@@ -1,0 +1,11 @@
+anyOf significa “puede ser uno u otro de los tipos listados”.
+Aquí permitimos string (cuando hay más) o null (fin de resultados).
+
+    next:                 # ← cursor de paginación
+          anyOf:
+            - type: string    # siguiente _id en formato string
+            - type: "null"    # null cuando no hay más páginas
+          description: _id de la última película devuelta para continuar la búsqueda
+      required:
+        - results
+        - next
