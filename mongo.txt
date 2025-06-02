@@ -1,0 +1,169 @@
+
+
+## Apartado 1: En la coleccion movies indique el  titulo y el numero de premios de la pelicula con mas premios (wins dentro de awards)
+
+db.movies.find({}, { _id:0, title:1, "awards.wins":1 }).sort({"awards.wins":-1}).limit(1)
+
+## Apartado 2: en la coleccion movies muestre un listado con las diferentes clasificaciones de edad que existes (rated). Para cada uno de ellos muestre el numero de documentos que tienen esa clasificacion
+
+db.movies.aggregate([{$group:{_id:"$rated", totalPeliculas:{$sum:1}}},{$sort:{totalPeliculas:-1}}])
+
+## Apartado 3: en la coleccion movies muestre un listado con los diferentes generos de pelicula que existen (genres)
+
+db.movies.distinct("genres")
+
+## Apartado 4: en la coleccion movies indique el numero de peliculas que hay entre los años 1970 y 1975 incluidos ambos extremos
+db.movies.countDocuments({year:{$gte:1970,$lte:1975}})
+
+
+Muestra las películas ordenadas por duración (runtime) de mayor a menor:
+
+db.movies.find({}, {_id:0, title:1, runtime:1}).sort({runtime:-1})
+Consulta 2:
+Indica el número de películas clasificadas como "PG":
+
+db.movies.countDocuments({rated:"PG"})
+Consulta 3:
+Muestra todas las películas que contienen "Drama" en sus géneros:
+
+db.movies.find({genres:"Drama"}, {_id:0, title:1, genres:1})
+Consulta 4:
+Indica el nombre de la película con mayor puntuación IMDb (imdb.rating):
+
+db.movies.find({}, {_id:0, title:1, "imdb.rating":1}).sort({"imdb.rating":-1}).limit(1)
+
+Consulta 5:
+Encuentra el número de películas lanzadas antes del año 1950:
+db.movies.countDocuments({year:{$lt:1950}})
+
+Consulta 6:
+Lista las películas cuyos idiomas (languages) incluyan "Spanish":
+db.movies.find({languages:"Spanish"}, {_id:0, title:1, languages:1})
+
+Consulta 7:
+Agrupa las películas por país (countries) indicando cuántas hay por cada país:
+
+db.movies.aggregate([{$unwind:"$countries"},{$group:{_id:"$countries", count:{$sum:1}}}])
+Consulta 8:
+Encuentra cuántas películas tienen exactamente 0 nominaciones a premios (awards.nominations):
+
+db.movies.countDocuments({"awards.nominations":0})
+Consulta 9:
+Muestra títulos y años de películas del género "Horror" lanzadas en los años 70:
+
+db.movies.find({genres:"Horror", year:{$gte:1970,$lt:1980}}, {_id:0, title:1, year:1})
+Consulta 10:
+Indica el número total de comentarios de películas (num_mflix_comments):
+
+
+db.movies.aggregate([{$group:{_id:null, totalComments:{$sum:"$num_mflix_comments"}}}])
+Consulta 11:
+Encuentra todas las películas dirigidas por "Francis Ford Coppola":
+
+db.movies.find({directors:"Francis Ford Coppola"},{_id:0,title:1})
+Consulta 12:
+Lista las películas que tienen más de 1 director:
+
+
+db.movies.find({$where:"this.directors.length>1"}, {_id:0,title:1,directors:1})
+Consulta 13:
+Indica los títulos y años de películas que tienen una calificación en Rotten Tomatoes (tomatoes.viewer.meter) mayor o igual a 90:
+
+db.movies.find({"tomatoes.viewer.meter":{$gte:90}},{_id:0,title:1,year:1,"tomatoes.viewer.meter":1})
+Consulta 14:
+Encuentra la película con mayor número de votos en IMDb (imdb.votes):
+
+
+db.movies.find({}, {_id:0,title:1,"imdb.votes":1}).sort({"imdb.votes":-1}).limit(1)
+Consulta 15:
+Indica cuántas películas tienen calificación (rated) "UNRATED" o "NOT RATED":
+
+db.movies.countDocuments({rated:{$in:["UNRATED","NOT RATED"]}})
+
+
+# Soluciones al problema 2
+
+## Apartado 1
+En la colección listingAndReviews indique el/los nombre(s) del alojamiento con más reviews.
+db.db.listingsAndReviews.find({}, {_id: 0, name: 1}).sort({number_of_reviews: -1}).limit(1)
+
+
+## Apartado 2
+En la colección listingAndReviews indique el/los nombre(s) del alojamiento con más amenities.
+db.listingsAndReviews.aggregate({$project: {_id: 0,name: 1,amenity_count: {$size: '$amenities'}}},{$sort:{amenity_count: -1}},{$limit: 1})
+
+
+## Apartado 3
+En la colección listingAndReviews indique para cada tipo de property_type el número de alojamientos de ese tipo.
+db.listingsAndReviews.aggregate([ { $group: { _id: "$property_type", count: { $sum: 1 } } }])
+
+
+## Apartado 4
+En la colección listingAndReviews indique el número de alojamientos que tienen 2, 3, 4 o 5 beds.
+db.listingsAndReviews.aggregate({$match:{beds:{$in:[2,3,4,5]}}},{$group:{_id:"$beds",count:{$sum:1}}})
+que no tnega 2,3,4 o 5 camas: db.listingsAndReviews.aggregate({$match:{beds:{$nin:[2,3,4,5]}}},{$group:{_id:"$beds",count:{$sum:1}}})
+
+
+
+EXTRAS
+
+En la colección listingAndReviews indique el nombre de alojamientos que tienen 2, 3, 4 o 5 beds.
+db.listingsAndReviews.aggregate({$match:{beds:{$in:[2,3,4,5]}}},{$project:{_id:0,name:1,beds:1}})
+
+
+Cual seria el precio maximo, minimo y medio de los alojamientos
+db.listingsAndReviews.aggregate([{$group: {_id: null,maxPrice: { $max: "$price" },minPrice: { $min: "$price" },averagePrice: { $avg: "$price" }}}])
+
+
+cual seria el nombre de los alojamientos que tienen TV de amenities e imprime el amenitie tv tmbn
+db.listingsAndReviews.aggregate({$match:{amenities:"TV"}},{$project:{_id:0, name:1,amenities:{$slice:["$amenities",1]}}})
+db.listingsAndReviews.find({amenities:"TV"},{_id:0,name:1,amenities:{$slice:1}})
+
+
+Cual seria el nombre de los alojamientos que ofrencen alojamiento con Wifi y TV a menos de 30 €, muestre en resultado el nombre, precio y amenities solicitadas
+db.listingsAndReviews.find({amenities:"TV",amenities:"Wifi", price:{$lt:30}},{_id:0, name:1, price:1, amenities:["TV","Wifi"]})
+
+
+cuantos alojamientos ofrencen alojamiento con Wifi y TV a menos de 30 €,
+db.listingsAndReviews.count({amenities:"TV",amenities:"Wifi", price:{$lt:30}})
+
+
+## Apartado 1: En la colección sales indique cuantos clientes con edades comprendidas 
+entre 50 y 70 incluidas (age dentro de customer) han comprado algo haciendo uso de un cupón (couponUsed a true)
+db.sales.countDocuments({
+  "customer.age": { $gte: 50, $lte: 70 },
+  couponUsed: true
+})
+
+## Apartado 2: En la coleccion sales muestre para cada venta unicamente el total de esa venta
+(la suma de todos los price dentro de items), la fecha de la venta (saleDate) y el correo del cliente
+(email dentro de customer). Ordene los resultados por total de venta, de mayor a menor.
+db.sales.aggregate([
+  {
+    $project: {
+      _id: 0,
+      saleDate: 1,
+      email: "$customer.email",
+      total: {
+        $sum: "$items.price"
+      }
+    }
+  },
+  { $sort: { total: -1 } }
+])
+## Apartado 3: En la coleccion sales indique el numero de ventas que contienen al menos un backpack y un 
+notepad (name dentro de items)
+db.sales.countDocuments({
+  "items.name": { $all: ["backpack", "notepad"] }
+})
+
+## Apartado 4 En la coleccion sales indique cuantas ventas estan asociadas a cada valor de satisfaccion  esatas de la base de datos nsetiori
+db.sales.aggregate([
+  {
+    $group: {
+      _id: "$customer.satisfaction",
+      totalVentas: { $sum: 1 }
+    }
+  },
+  { $sort: { _id: 1 } }
+])
