@@ -26,8 +26,7 @@ bash
 Copiar
 Editar
 http://localhost:3000/api/card/01087
-
-EADME — Examen Sistemas Web 2 (usuario: y.llop, NIA: 116171)
+README — Examen Sistemas Web 2 (usuario: y.llop, NIA: 116171)
 🔒 Evitar pedir la contraseña todo el rato
 bash
 Copiar
@@ -109,3 +108,4 @@ ruby
 Copiar
 Editar
 http://127.0.0.1:3000/api/card/01087
+¿Quieres que lo ponga también como archivo README.md listo par
